@@ -4,7 +4,7 @@ title: Home
 ---
 
 # Zuspec
-Zuspec, a portmanteu of zusammen (German for "together") and specification, 
+Zuspec, a portmanteau of zusammen (German for "together") and specification, 
 is a suite of tools for working with action-relation-level (ARL) modeling 
 descriptions. These descriptions enable co-specification of design and
 test functionality, as well as co-specification of hardware and software
