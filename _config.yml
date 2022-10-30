@@ -1,0 +1,30 @@
+# Setup
+title:               'Zuspec'
+tagline:             'Co-design of test, design, hardware, and softwore'
+description:         ''
+url:                 '.'
+baseurl:             '.'
+paginate:            5
+#permalink:           pretty
+
+exclude:
+    - packages
+
+# About/contact
+author:
+  name:              Matthew Ballance
+  url:               http://mballance.github.io
+  email:             matt.ballance@gmail.com
+  
+github:
+  repo: http://github.com/zuspec
+
+# Gems
+plugins:
+  - jekyll-paginate
+
+# Custom vars
+#version:             1.0.0
+#google_analytics_id: G-B75HY0XCL2
+
+copyright:             © <!--copyyears--> Matthew Ballance; All rights reserved.
