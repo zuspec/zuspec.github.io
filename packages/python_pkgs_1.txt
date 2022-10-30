@@ -1,9 +1,0 @@
-pyyaml
-cairosvg
-sphinx-rtd-theme
-Sphinx
-sphinx-jsonschema
-sphinxcontrib-makedomain
-sphinx-argparse
-jinja2
-sphinxcontrib-spelling
