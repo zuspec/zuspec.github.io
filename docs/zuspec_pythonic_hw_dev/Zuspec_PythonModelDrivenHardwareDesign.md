@@ -4,18 +4,38 @@ author: ["Matthew Ballance"]
 date: "2025-09-21"
 keywords: [Verilog, Hardware Modeling, PSS, Firmware, Python]
 abstract: |
-  Hardware is hard, and getting more difficult each year as systems become
-  more complex. Design and verification teams are looking to boost productivity
-  as a way to keep pace, while also looking for ways to provide models
-  of the design behavior to software teams earlier. The fragmented and 
-  esoteric nature of the languages and methodologies used for design and 
-  verification only make this more difficult. Zuspec is a unified, extensible 
-  Pythonic framework for multi-abstraction hardware modeling that simplifies the
-  design and verification process and enables traditional and AI-enabled automation.
+  Designing and implementing hardware is challenging, and is getting more 
+  difficult each year as systems become more complex. Design and verification 
+  teams are looking to boost productivity as a way to keep pace, 
+  while also looking for ways to provide models of the design behavior to 
+  software teams earlier. The fragmented and esoteric nature of the languages 
+  and methodologies used for design and verification only make this more difficult. 
+  Zuspec is a unified, extensible Pythonic framework for multi-abstraction 
+  hardware modeling that simplifies the design and verification process and 
+  enables traditional and AI-enabled automation.
 
 ...
 
-# Zuspec: Pythonic Model-Driven Hardware Development
+The abstraction gap and model fragmentation are two key drivers of hardware
+design-flow complexity. The abstraction difference between a 
+paper design specification and the register-transfer-level (RTL) model that 
+implements that specification is enormous, and only increasing as designs 
+become larger and more complex. It's natural to focus attention on the 
+RTL model, since that is required to get to implementation. However, RTL
+models are also time-consuming to produce and execute slowly. This delays
+how early software teams obtain access to a representation of the design,
+and limits the platforms on which they can work to fast hardware emulation
+or prototyping environments.
+
+Creating more models at different levels of abstraction seems a good 
+approach on the surface. Unfortunately, the languages and techniques
+used to create these more-abstract models are fragmented, leading to
+each model effectively being an independent effort. Integrating these
+models into existing environments -- for example, integrating a 
+C++ transaction-level model into a SystemVerilog/UVM testbench -- is
+also typically labor-intensive.
+
+
 
 Core challenges:
 - Abstraction gap on hardware side, and need to increase design+verification
@@ -40,6 +60,8 @@ Approaches:
 - Increase test productivity and reuse with new semantics (PSS)
 - Specifications and methodologies for reuse (IP-XACT, FuseSoc)
 
+# Considering the Ecosystem
+
 All of these innovations primarily come from a hardware-design 
 perspective, and focus on enabling hardware-design flows. That,
 in itself, is a challenge given the relative sizes of the 
@@ -48,9 +70,9 @@ difficult to find accurate detailed data, US Bureau of Labor
 Statistics reports a labor-market size of 76,800 for hardware 
 engineers vs a labor-market size of 1,534,790 for software 
 engineers (inclusive of all disciplines in both cases). Given 
- are from the perspecitive have been initiated from a hardware design perspective,
-precisely because of unique semantics required to accurately capture
-the details of hardware design and verification models. This, in 
+are from the perspective have been initiated from a hardware design 
+perspective, precisely because of unique semantics required to accurately 
+capture the details of hardware design and verification models. This, in 
 itself, is a core challenge. Since the collective challenge is the system, 
 crossover is a key measure of success. Specifically, how readily can
 a software discipline make use of an artifact created by a hardware 
@@ -60,9 +82,9 @@ to the needs of the minority seems unlikely.
 
 # Zuspec 
 
-Zuspec targets this success criteria by taking Python, an existing 
-software language ecosystem, as its starting point and building
-hardware semantics into that ecosystem. The result is a platform
+Zuspec ^[https://zuspec.github.io/] targets this success criteria by 
+adopting Python, an existing software language ecosystem, as its starting 
+point and building hardware semantics into that ecosystem. The result is a platform
 that offers high productivity for hardware engineering, as well
 as an increased ability to share artifacts with software disciplines.
 
@@ -102,13 +124,13 @@ But, language popularity is only relevant for the set of languages
 that can be used to capture relevant domain semantics. Fortunately,
 Python measures up very well here again.
 
-## Technical Arguments for Python
+### Technical Arguments for Python
 
 There are strong technical arguments for the Python language as well.
 As a dynamic language, Python provides excellent facilities for 
 introspecting and manipulating a Python description. 
 
-```python3
+```python
 import zuspec.dataclasses as zdc
 
 @zdc.dataclass
@@ -146,7 +168,7 @@ that are available during the compilation phase. In contrast, Python
 allows these facilities to be applied to a Python description at any 
 point in time, providing much more flexibility in processing flows. 
 Effectively, Python allows libraries like Zuspec to act as a compiler
-within the Python interpeter.
+within the Python interpreter.
 
 Python also offers a strong set of system-programming features.
 Combined with Python's dynamic language features, these dramatically
@@ -185,7 +207,7 @@ Zuspec identifies regions with these semantics with a combination of
 Python `decorators` and base classes. Let's look at the same counter 
 example expressed in hardware with Zuspec.
 
-```python3
+```python
 import zuspec.dataclasses as zdc
 
 @zdc.dataclass
@@ -218,7 +240,7 @@ must first be used to create an implementation. The implementation
 could be pure-Python, Verilog, or something entirely different like
 documentation.
 
-```python3
+```python
 import asyncio
 from zuspec.be.py import ComponentFactory
 import zuspec.dataclasses as zdc
@@ -247,7 +269,8 @@ the model. While the interface is Python, the implementation
 may not be Python. For example, the factory may transform the
 model to Verilog and create a Verilator ^[https://www.veripool.org/verilator/]
 simulator executable that evaluates the model much faster than
-a pure-Python implementation.
+a pure-Python implementation, while still exposing a Python 
+interface to the signals.
 
 
 ```verilog
@@ -267,14 +290,83 @@ endmodule
 ```
 
 Another factory might transform the model to the synthesizable
-Verilog shown above to be used as input to existing flows. 
-
-
-
+Verilog shown above to be used as input to existing 
+synthesis or simulation flows. 
 
 # Usecases
 
 ![Modeling Abstractions](zuspec_model_abstractions2.png)
+
+Zuspec targets the taxonomy of models shown in the figure above. 
+Interface models focus on capturing how the system view of the
+component. For example, interacting with the device may be 
+at the Programmer View (PV) level, using memory-mapped registers.
+Implementation models focus on the device internals, implementing
+the operations initiated by the interface model. 
+
+## Transfer-Function Model
+
+A transfer-function model represents the system impact of device
+operations. Transfer-function models are high level, and are
+useful for performing statistical analysis of the system impact 
+of a device. For example, the transfer-function model of a DMA
+copy operation is shown below.
+
+```python
+import zuspec.dataclasses as zdc
+
+@zdc.dataclass
+class Dma(zdc.Component):
+    channels : ChannelR = dc.pool(count=16)
+
+@zdc.dataclass
+class Mem2Mem(zdc.Action[Dma]):
+    dat_i : MemB = dc.input()
+    dat_o : MemB = dc.output()
+    chan : ChannelR = dc.lock()
+
+    @zdc.constraint
+    def _mem_c(self):
+        self.dat_i.sz == self.dat_o.sz
+```
+
+The DMA mem-copy model above captures key aspects of the operation:
+- Exclusive (lock) access to a channel is required for the duration of the operation
+- A properly-initialized source-memory region (dat_i) is required for the operation
+- The result of the operation is another memory region (dat_o) of the same size as the source
+
+
+## Programmer-View
+
+
+## Behavioral Micro-Architecture Model
+
+```python
+import zuspec.dataclasses as zdc
+
+@zdc.dataclass
+class DmaBehavioral(zdc.Component):
+    regs : DmaRegs = zdc.field()
+
+    @zdc.process
+    async def _process_requests(self):
+
+        while True:
+            # Wait for an active channel
+            active : bool = False
+            while not active:
+                for i in range(16):
+                    active |= regs.channels[i].csr.read().en
+            
+            target_c = self._pick_channel()
+
+            channel = self.regs.channels[i]
+
+            # Carry out memory transfer for target channel
+            # ...
+
+```
+
 
 - Key points
   - Modeling abstraction scope
