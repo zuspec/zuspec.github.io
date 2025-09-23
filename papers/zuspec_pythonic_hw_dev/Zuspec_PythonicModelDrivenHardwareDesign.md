@@ -3,6 +3,10 @@ title: "Zuspec: Pythonic Model-Driven Hardware Development"
 author: ["Matthew Ballance"]
 date: "2025-09-21"
 keywords: [Verilog, Hardware Modeling, PSS, Firmware, Python]
+header-includes: |
+  \usepackage{listings}
+  \lstset{captionpos=b,float=false}
+
 abstract: |
   Designing and implementing hardware is challenging, and is getting more 
   difficult each year as systems become more complex. Design and verification 
@@ -12,91 +16,63 @@ abstract: |
   and methodologies used for design and verification only make this more difficult. 
   Zuspec is a unified, extensible Pythonic framework for multi-abstraction 
   hardware modeling that simplifies the design and verification process and 
-  enables traditional and AI-enabled automation.
+  enables traditional and AI-driven automation.
 
 ...
 
 The abstraction gap and model fragmentation are two key drivers of hardware
 design-flow complexity. The abstraction difference between a 
-paper design specification and the register-transfer-level (RTL) model that 
-implements that specification is enormous, and only increasing as designs 
-become larger and more complex. It's natural to focus attention on the 
-RTL model, since that is required to get to implementation. However, RTL
-models are also time-consuming to produce and execute slowly. This delays
-how early software teams obtain access to a representation of the design,
+natural-language design specification and the register-transfer-level (RTL) 
+model that implements it is enormous, and only increasing as designs 
+become larger and more complex. It's natural to prioritize the 
+RTL model, since that is required to get to implementation. However, 
+because RTL models are detailed and execute slowly, they don't do a good job of
+meeting the needs of adjacent disciplines, such as firmware. 
+This delays how early software teams obtain access to a representation of the design,
 and limits the platforms on which they can work to fast hardware emulation
 or prototyping environments.
 
-Creating more models at different levels of abstraction seems a good 
-approach on the surface. Unfortunately, the languages and techniques
-used to create these more-abstract models are fragmented, leading to
-each model effectively being an independent effort. Integrating these
-models into existing environments -- for example, integrating a 
-C++ transaction-level model into a SystemVerilog/UVM testbench -- is
-also typically labor-intensive.
-
-
-
-Core challenges:
-- Abstraction gap on hardware side, and need to increase design+verification
-  productivity as designs increase in size
-- Biggest challenge is the system, neither hardware nor software individually.
-  - Requires working across disciplines
-  - Current environments and workflows encourages hardware and software to
-    carry out their work in separate silos until very late
-- Need to work with other disciplines
-  - Firmware
-  - Emulation
-  - Post-Silicon
-  - 
-
-# Approaches
-Approaches:
-- Increase design-creation productivity with new design languages
-  and code generation (CHISEL, etc)
-- New ways of constructing testbench environments (cocotb, etc)
-- Harware/software co-simulation to allow co-development of 
-  firmware in hardware environments
-- Increase test productivity and reuse with new semantics (PSS)
-- Specifications and methodologies for reuse (IP-XACT, FuseSoc)
+Over time, new requirements have resulted in the development of new 
+domain-specific languages and language-like class libraries. SystemVerilog, 
+PSS, UPF, IP-XACT, SystemC, and others all provide features that address pain 
+points of hardware development.  Unfortunately, this has also led to a very 
+fragmented ecosystem with loosely-integrated languages and methodologies and 
+complex build flows.
 
 # Considering the Ecosystem
 
-All of these innovations primarily come from a hardware-design 
+All of these innovations have primarily come from a hardware-design 
 perspective, and focus on enabling hardware-design flows. That,
 in itself, is a challenge given the relative sizes of the 
 hardware- and software-engineering ecosystems. While it's 
 difficult to find accurate detailed data, US Bureau of Labor 
 Statistics reports a labor-market size of 76,800 for hardware 
 engineers vs a labor-market size of 1,534,790 for software 
-engineers (inclusive of all disciplines in both cases). Given 
-are from the perspective have been initiated from a hardware design 
-perspective, precisely because of unique semantics required to accurately 
-capture the details of hardware design and verification models. This, in 
-itself, is a core challenge. Since the collective challenge is the system, 
-crossover is a key measure of success. Specifically, how readily can
-a software discipline make use of an artifact created by a hardware 
-discipline and vice versa. Motivating more than 95% percent of the
-combined hardware/software ecosystem to adopt an environment tailored
-to the needs of the minority seems unlikely.
+engineers (inclusive of all sub-disciplines in both cases). 
+
+Given that the collective challenge is a combined hardware and 
+software system, getting buy-in from both disciplines is critical.
+It seems quite unlikely that a language created to serve the unique
+requirements of the ecosystem's minority can serve the combined
+needs and gain the acceptance of the majority.
 
 # Zuspec 
 
-Zuspec ^[https://zuspec.github.io/] targets this success criteria by 
-adopting Python, an existing software language ecosystem, as its starting 
-point and building hardware semantics into that ecosystem. The result is a platform
-that offers high productivity for hardware engineering, as well
-as an increased ability to share artifacts with software disciplines.
+Zuspec ^[https://zuspec.github.io/] adopts Python as its starting 
+point, and embeds hardware semantics into that ecosystem. The result 
+is a platform that is familiar to software engineers, offers 
+high productivity for hardware engineering, and has the goal of 
+increasing the ability to share artifacts across the disciplines.
 
 ## Why Python?
 
 Many factors are involved in selecting a language for any purpose: 
 key language features, tool ecosystem, relevant libraries, as well
-as the community around the language. Applying a language to the 
-semantics of other domains raises another: flexibility of the
-language. 
+as the community around the language. Applying an existing language to the 
+semantics of another  domains raises another factor to consider: 
+flexibility of the language. 
 
-### Popularity is Self-Reinforcing
+### Popularity can be Self-Reinforcing
 
 Python is a popular language overall, holding the top spot in many
 rankings for several consecutive years, and being ranked highly 
@@ -110,7 +86,7 @@ of course, a rough measure a the size of a language's community. Larger
 communities produce more ideas for using a language and, thus,
 a a larger library ecosystem. Larger communities more-rapidly
 produce and refine adjacent technologies, such as code 
-development and package management tools.
+development and package management tools, and new language features.
 
 Popularity often builds upon itself, and there is evidence that 
 AI is acting as a driver of Python's popularity.
@@ -194,18 +170,20 @@ are always more restrictive than native Python semantics, allowing
 existing code checkers (eg mypy) to work unmodified. 
 
 Zuspec divides a Python description into two core region kinds:
+
 - Pure Python regions
 - Python regions with domain-specific semantics
 
-In order to implement a counter in hardware, we need to be able to capture
-some unique semantics:
+Even a simple binary counter highlights several unique semantics that 
+a hardware description must capture:
+
 - Bit width of the `count` field
 - When the count should be incremented
 - Hardware-specific notions like reset
 
-Zuspec identifies regions with these semantics with a combination of
-Python `decorators` and base classes. Let's look at the same counter 
-example expressed in hardware with Zuspec.
+Zuspec identifies regions with these semantics using a combination of
+Python `decorators` and base classes. The example below shows a 
+32-bit counter modeled using the Zuspec library.
 
 ```python
 import zuspec.dataclasses as zdc
@@ -223,22 +201,23 @@ class Counter(zdc.Component):
     else:
       self.count += 1
 ```
+
 The `Counter` example above illustrates these two regions. By default,
-pure Python semantics are used. This means that the `import` statement
+pure Python semantics are used. Consequently, the `import` statement
 at the top uses pure Python semantics. 
 
 The `Counter` class inherits from the Zuspec `Component` class, which
 designates it as a class with specific capabilities.  The `inc` method
 is decorated with the `sync` decorator. This marks it as a method that
 is automatically evaluated on the active edge of the specified 
-clock or reset signals, where the value of variables is deferred. 
+clock or reset signals, and a method where deferred assignment is used.
 It also marks it as a method that may not be invoked directly.
 
 A class domain with special semantics is a model of implementation, 
 and cannot be used directly. Instead, a `Transformer` class 
-must first be used to create an implementation. The implementation 
-could be pure-Python, Verilog, or something entirely different like
-documentation.
+must first be used to create an implementation. In this case, the 
+implementation could be pure-Python, Verilog, or something entirely 
+different like documentation.
 
 ```python
 import asyncio
@@ -262,12 +241,13 @@ def test_smoke(self):
   assert tb.counter.count == 10
 ```
 
-The example above shows a small testbench around the `Count` 
+The example above shows a small testbench around the `Counter` 
 component with a simple `Pytest` unit test. The type transformer 
 creates a Python object that is used to dynamically evaluate
 the model. While the interface is Python, the implementation
-may not be Python. For example, the factory may transform the
-model to Verilog and create a Verilator ^[https://www.veripool.org/verilator/]
+may or may not be Python. For example, the transformer might, 
+instead, transform the model to Verilog and create a Verilator 
+^[https://www.veripool.org/verilator/]
 simulator executable that evaluates the model much faster than
 a pure-Python implementation, while still exposing a Python 
 interface to the signals.
@@ -289,153 +269,43 @@ module Counter(
 endmodule
 ```
 
-Another factory might transform the model to the synthesizable
+Another transformer might convert the model to the synthesizable
 Verilog shown above to be used as input to existing 
 synthesis or simulation flows. 
 
-# Usecases
+# The User-Extensible Language
 
-![Modeling Abstractions](zuspec_model_abstractions2.png)
+The `Counter` example is quite simple, and at the register-transfer level (RTL).
+Zuspec is designed to be able to capture a broad range of 
+hardware-centric semantics that cover:
 
-Zuspec targets the taxonomy of models shown in the figure above. 
-Interface models focus on capturing how the system view of the
-component. For example, interacting with the device may be 
-at the Programmer View (PV) level, using memory-mapped registers.
-Implementation models focus on the device internals, implementing
-the operations initiated by the interface model. 
+- Verification
+  - Constrained randomization and functional coverage
+  - Portable test and stimulus (PSS)
+  - Assertions (SVA)
+- Hardware design
+  - RTL
+  - Medium-level synthesis
+  - Transaction-level modeling (TLM)
+  - Register modeling
+  - Clock and power domains
+  - Physical design
+- Firmware
+  - Register interface
+  - Specialized memory management
 
-## Transfer-Function Model
+Zuspec brings a new approach to domain-specific languages that leverages the 
+popularity and ecosystem of Python, and embeds domain-specific semantics from
+hardware design, verification, and firmware. The big "bet" is that educating
+humans and LLMs on the delta between a Python and a set of domain-specific
+semantics is far easier than doing the same with a completely new language.
 
-A transfer-function model represents the system impact of device
-operations. Transfer-function models are high level, and are
-useful for performing statistical analysis of the system impact 
-of a device. For example, the transfer-function model of a DMA
-copy operation is shown below.
+While Zuspec models are captured in Python, processing tools may transform Zuspec 
+models into appropriate non-Python implementations such as embedded C or 
+synthesizable Verilog.  Zuspec encourages a Pythonic development process for 
+hardware that is code-centric, AI-friendly, and nimble. And, most importantly, 
+Zuspec provides togetherness: a common environment in which new language 
+innovations can be explored along with integrated existing technologies. 
 
-```python
-import zuspec.dataclasses as zdc
-
-@zdc.dataclass
-class Dma(zdc.Component):
-    channels : ChannelR = dc.pool(count=16)
-
-@zdc.dataclass
-class Mem2Mem(zdc.Action[Dma]):
-    dat_i : MemB = dc.input()
-    dat_o : MemB = dc.output()
-    chan : ChannelR = dc.lock()
-
-    @zdc.constraint
-    def _mem_c(self):
-        self.dat_i.sz == self.dat_o.sz
-```
-
-The DMA mem-copy model above captures key aspects of the operation:
-- Exclusive (lock) access to a channel is required for the duration of the operation
-- A properly-initialized source-memory region (dat_i) is required for the operation
-- The result of the operation is another memory region (dat_o) of the same size as the source
-
-
-## Programmer-View
-
-
-## Behavioral Micro-Architecture Model
-
-```python
-import zuspec.dataclasses as zdc
-
-@zdc.dataclass
-class DmaBehavioral(zdc.Component):
-    regs : DmaRegs = zdc.field()
-
-    @zdc.process
-    async def _process_requests(self):
-
-        while True:
-            # Wait for an active channel
-            active : bool = False
-            while not active:
-                for i in range(16):
-                    active |= regs.channels[i].csr.read().en
-            
-            target_c = self._pick_channel()
-
-            channel = self.regs.channels[i]
-
-            # Carry out memory transfer for target channel
-            # ...
-
-```
-
-
-- Key points
-  - Modeling abstraction scope
-  - Key features
-    - System assembly at all levels
-    - TLM
-    - Verification
-    - Generative hardware creation
-  - Key derived artifacts
-    - Verilog for synthesis
-    - C for device drivers or management firmware
-  - Key capabilities
-    - Pythonic user experience -- code is central
-      - Integrated engines
-      - Built-in automation for build flows
-    - Reuse of pre-packaged artifacts
-
-
-Unique technical aspects
-- Can't do this in C/C++ without creating a new compiler that 
-  recognizes Union[<dialect>,C/C++]. No modular/distributed
-  path to a compiler that recognizes Union[<dialect1>,<dialect2>,C/C++]
-
-
-For any of these that require 
-
-The abstraction gap between synthesiable Verilog RTL and the resulting
-gates on a silicon wafer is vast. 
-However, increased complexity in 
-digital hardware designs provides a compelling reason to create 
-even more-abstract models. 
-
-- Left-shift the work of other teams, such as firmware teams
-- To increase the simulation speeed of the system model
-- Model the 'user' perspective of the design -- often used for functional verification and bringup tests.
-
-Creating more models and raising the modeling abstraction level is 
-genearlly beneficial. Unfortunately, the tools, languages, and techniques 
-used for these different models are fragmented, leading to disconnected models, 
-redundant work, and increased risk of bugs. In addition, disconnected models
-often limit the supported types of analysis. 
-EDA flows are complex, and the required flow-management scripts become 
-quite complex.
-
-
-Zuspec proposes a Pythonic multi-abstraction modeling framework that 
-covers 
-- Abstract operation-level models
-- Transfer-function
-- Programmer View
-- TLM
-- RTL 
-
-- Verification and design
-- Static/Formal and Dynamic evaluation
-- Hardware and firmware
-
-- Integrated build-flow management
-
-# Taxonomy of Models
-
-# Why Python?
-
-# The Zuspec Language
-Languages composted of syntax and semantics. Syntax is the way that
-characters are arranged. Semantics is 
-- Two parts
-  - 
-
-different models are 
 
 

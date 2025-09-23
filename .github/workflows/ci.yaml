@@ -15,6 +15,7 @@ jobs:
           run: |
             sudo apt-get install ruby-full build-essential zlib1g-dev cmake doxygen ninja-build
             sudo apt-get install verilator
+            sudo apt-get install pandoc texlive-latex-base texlive-latex-recommended
             sudo gem install jekyll bundler jekyll-theme-tactile redcarpet pygments.rb jekyll-paginate
         - name: Install Python
           run: |
