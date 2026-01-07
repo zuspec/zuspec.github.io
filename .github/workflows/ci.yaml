@@ -24,18 +24,16 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y pandoc texlive-latex-base texlive-latex-recommended
             
-        - name: Install Python Dependencies
+        - name: Install UV and Fetch Package Dependencies with IVPM
           run: |
             python3 -m pip install --upgrade pip
             python3 -m pip install uv
-            python3 -m pip install -r docs/requirements.txt
-            
-        - name: Fetch Package Dependencies with IVPM
-          run: |
             uvx ivpm update -a
             
         - name: Build Documentation and Generate llms.txt
           run: |
+            # Use Python from ivpm environment which has Sphinx installed
+            export PATH=$PWD/packages/python/bin:$PATH
             make
             
         - name: Verify llms.txt was generated
