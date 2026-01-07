@@ -1,4 +1,9 @@
 
 web/
 .jekyll-cache/
+docs/_build/
+docs/_static/.gitkeep
+docs/_templates/.gitkeep
+
+packages/
 
