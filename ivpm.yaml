@@ -29,4 +29,6 @@ package:
         src: pypi
       - name: sphinxcontrib-mermaid
         src: pypi
+      - name: myst-parser
+        src: pypi
 
