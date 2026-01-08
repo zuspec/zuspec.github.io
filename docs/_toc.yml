@@ -10,3 +10,11 @@ subtrees:
 - entries:
   - title: Zuspec Dataclasses
     url: "https://zuspec.github.io/zuspec-dataclasses"
+  - title: Zuspec HDLSim Backend
+    url: "https://zuspec.github.io/zuspec-be-hdlsim"
+  - title: Zuspec SystemVerilog Backend
+    url: "https://zuspec.github.io/zuspec-be-sv"
+  - title: Zuspec Software Backend
+    url: "https://zuspec.github.io/zuspec-be-sw"
+#  - title: Zuspec Formal Verification Backend
+#    url: "https://zuspec.github.io/zuspec-be-fv"
