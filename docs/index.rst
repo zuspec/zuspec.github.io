@@ -17,30 +17,6 @@ Zuspec is a unified, extensible Pythonic framework for multi-abstraction
 hardware modeling that simplifies the design and verification process and 
 enables traditional and AI-driven automation.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting Started:
-
-   overview
-   installation
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Package Documentation:
-
-   packages/zuspec-dataclasses/index
-   packages/zuspec-be-sv/index
-   packages/zuspec-be-sw/index
-   packages/zuspec-be-hdlsim/index
-   packages/zuspec-be-trace/index
-   packages/zuspec-be-fv/index
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Papers & Publications:
-
-   papers
-
 Indices and tables
 ==================
 
