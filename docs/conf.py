@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Zuspec'
-copyright = '2022-2025, Matthew Ballance'
+copyright = '2022-2026, Matthew Ballance'
 author = 'Matthew Ballance'
 release = '2026.1'
 
@@ -21,7 +21,11 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'myst_parser',
+    'sphinx_external_toc'
 ]
+
+external_toc_path = "_toc.yml"
+external_toc_exclude_missing = False
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -29,7 +33,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'alabaster'
 html_static_path = ['_static']
 
 # -- MyST Parser configuration -----------------------------------------------

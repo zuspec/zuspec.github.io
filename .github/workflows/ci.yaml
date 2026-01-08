@@ -36,19 +36,10 @@ jobs:
             export PATH=$PWD/packages/python/bin:$PATH
             make
             
-        - name: Verify llms.txt was generated
-          run: |
-            if [ ! -f web/llms.txt ]; then
-              echo "Error: llms.txt was not generated in web/"
-              exit 1
-            fi
-            echo "✓ llms.txt generated successfully"
-            echo "Size: $(wc -c < web/llms.txt) bytes"
-
         - name: Deploy to GitHub Pages
           uses: JamesIves/github-pages-deploy-action@v4
           with:
             branch: gh-pages
-            folder: web
+            folder: docs/_build/html
             clean: true
 
