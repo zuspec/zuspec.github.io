@@ -93,5 +93,5 @@ To verify your installation:
 Next Steps
 ----------
 
-After installation, check out the :doc:`packages/zuspec-dataclasses/index` 
+After installation, check out the Zuspec Dataclasses
 documentation to learn about the core language features.

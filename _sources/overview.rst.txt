@@ -107,7 +107,7 @@ Getting Started
 ---------------
 
 To get started with Zuspec, see the :doc:`installation` guide and explore the
-:doc:`packages/zuspec-dataclasses/index` documentation for the core language.
+Zuspec Dataclasses documentation for the core language.
 
 For a comprehensive overview, see the :doc:`papers` section which includes the
 full academic paper on Zuspec.
