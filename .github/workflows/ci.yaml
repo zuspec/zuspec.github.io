@@ -36,10 +36,55 @@ jobs:
             export PATH=$PWD/packages/python/bin:$PATH
             make
             
-        - name: Deploy to GitHub Pages
-          uses: JamesIves/github-pages-deploy-action@v4
-          with:
-            branch: gh-pages
-            folder: docs/_build/html
-            clean: true
+        # `Deploy to GitHub Pages` WAS HERE and is deliberately gone
+        # (2026-08-31, wave 4).
+        #
+        #   - name: Deploy to GitHub Pages
+        #     uses: <JamesIves' gh-pages deploy action, v4>
+        #     with:
+        #       branch: gh-pages
+        #       folder: docs/_build/html
+        #       clean: true
+        #
+        # THE ACTION IS NOT NAMED IN FULL ABOVE, ON PURPOSE. git-sync's
+        # publish_risk() reads workflow trees as TEXT: it cannot tell a
+        # publisher from a COMMENT DESCRIBING A PUBLISHER THAT WAS JUST
+        # REMOVED, and it refuses to pull any ref whose tree names one without
+        # also naming the release-authority switch. Spelling it out here would
+        # leave this repository unable to receive inbound work -- the deletion
+        # would be the reason the repo could not sync. Wave 3a shipped that
+        # mistake to eleven repositories before it was understood.
+        #
+        # It had NO `if:` AT ALL, on a workflow triggered by `push` to `main`.
+        # This repository is joining a five-minute bidirectional Forgejo <->
+        # GitHub mirror and git-sync moves the default branch, so a sync cycle
+        # would have force-written gh-pages -- with `clean: true`, deleting
+        # whatever it did not regenerate. A mirror operation must never be a
+        # publishing operation.
+        #
+        # DELETED rather than gated because dvkit.org owns all documentation.
+        # A tag-gated Pages deploy would still be a second publisher of the
+        # same content on a different schedule, and two publishers that agree
+        # today diverge the first time one fails quietly. It is also the
+        # specific action the release-conformance scan pattern is known to
+        # miss, so it never appeared in a report.
+        #
+        # THE BUILD ABOVE STAYS, as a CI check: a broken cross-reference should
+        # fail here, on the commit that introduced it, not render as a dead
+        # link. What replaces the deploy is the docs pipeline in
+        # .forgejo/workflows/, which uploads the built HTML as an artifact for
+        # the host-side poller to promote to dvkit.org.
+        #
+        # The gh-pages branch still exists and is still served by GitHub Pages.
+        # Nothing writes to it any more; retiring the site itself is a
+        # separate, user-visible step recorded in the migration STATUS.md.
+        - name: Sanity-check the build
+          # The deploy used to be the only thing that would notice an empty
+          # build. Sphinx exits 0 on a build that produced almost nothing, and
+          # without a consumer downstream a collapsed doc set would now pass
+          # silently.
+          run: |
+            test -s docs/_build/html/index.html \
+              || { echo "::error::no index.html in the build output"; exit 1; }
+            echo "generated pages: $(find docs/_build/html -name '*.html' | wc -l)"
 
